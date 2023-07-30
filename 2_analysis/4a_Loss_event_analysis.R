@@ -25,8 +25,8 @@ runs.comb$Management <- factor(runs.comb$Management, levels = c("None", "Group",
 
 runs.comb$Driver.set <- paste0(runs.comb$GCM,"." ,runs.comb$rcp)
 
-runs.comb$RCP.name <- car::recode(runs.comb$rcp, "'rcp45'='RCP 4.5'; 'rcp85'='RCP 8.5'")
-runs.comb$RCP.name <- factor(runs.comb$RCP.name, levels=c("RCP 4.5", "RCP 8.5"))
+runs.comb$RCP.name <- car::recode(runs.comb$rcp, "'rcp45'='RCP4.5'; 'rcp85'='RCP8.5'")
+runs.comb$RCP.name <- factor(runs.comb$RCP.name, levels=c("RCP4.5", "RCP8.5"))
 
 runs.late <- runs.comb[runs.comb$year >= 2025,]
 
@@ -153,111 +153,8 @@ ggplot(data=crash.stack) +
   geom_bar(aes(x=rcp, y=values, fill=Management), position="dodge", stat="summary", fun.y="mean") +
   geom_errorbar(aes(x=rcp, y=values, fill=Management), position="dodge", stat="summary", fun.y="sd") +
   scale_y_continuous(name="Mean Number of Loss Events", expand=c(0,0)) +
-  scale_x_discrete(labels=c("RCP 4.5", "RCP 8.5")) +
+  scale_x_discrete(labels=c("RCP4.5", "RCP8.5")) +
   coord_cartesian(ylim=c(0,2.1)) +
   scale_fill_manual(values=c("None"="#1f78b4", "Under"="#a6cee3", "Shelter"="#33a02c", "Group"="#b2df8a")) +
   theme.clean + theme(axis.title.x=element_blank(), panel.spacing.y = unit(2, "lines"))
 dev.off()
-
-
-
-
-
-
-
-
-
-
-
-#---------------------------------------------------#
-# Supplemental analysis
-#---------------------------------------------------#
-
-runs.late$loss.event.20 <- ifelse(runs.late$agb.rel.diff <= -.20, T, F)
-
-sum.df <- aggregate(crash.stack, by = c("Management", "ind") ,FUN = mean)
-
-agg.sum <- aggregate(values~ind+Management, data = crash.stack, FUN = mean, na.rm = T)
-agg.sum[, "sd"] <- aggregate(values~ind+Management, data = crash.stack, FUN = sd, na.rm = T)[, "values"]
-
-#Counting the duration of the crash events
-runs.count <- data.frame()
-for(MOD in unique(runs.late$GCM)){
-  for(RCP in unique(runs.late$rcp)){
-    for(MNG in unique(runs.late$Management)){
-      temp <- runs.late[runs.late$GCM == MOD & runs.late$rcp == RCP & runs.late$Management == MNG,]
-      count <-0
-      f.crash <- F
-      for(i in 1:nrow(temp)){
-        #Teasing out the duration of the crashes
-        if(temp[i, "loss.event.20"] == T & f.crash == F){
-          temp[i, "crash.status"] <- "first.crash"
-          count <- count + 1
-          if(i < 74 & temp[i+1, "loss.event.20"] == F){ #Caveat, if first crash is year 2099 we don't flag. Doesn't present a problem with our data
-            f.crash <- T #Where we label that first crash happened
-          }
-        } else if(temp[i, "loss.event.20"] == F & f.crash == F){
-          temp[i, "crash.status"] <- "pre-crash"
-          count <- 0
-        } else if(temp[i, "loss.event.20"] == F & f.crash == T){
-          temp[i, "crash.status"] <- "recovery"
-          count <- 0
-        } else if(temp[i, "loss.event.20"] == T & f.crash == T){
-          temp[i, "crash.status"] <- "subsequent.crash"
-          count <- count + 1
-        }
-        
-        temp[i, "years.crash"] <- count
-        
-      }
-      runs.count <- rbind(runs.count, temp)
-    }
-  }
-}
-
-#Calculating the full length of the crashes
-for(i in 5:nrow(runs.count)){
-  DRIVE <- runs.count[i, "Driver.set"]
-  MNG <- runs.count[i, "Management"]
-  YR <- runs.count[i, "year"]
-  if(YR != 2098){
-    post <- runs.count[runs.count$Driver.set == DRIVE & runs.count$Management == MNG & runs.count$year == YR+1 , "loss.event.20"]
-    runs.count[i, "full.duration"] <- ifelse((runs.count[i, "loss.event.20"] == T & post ==F), runs.count[i, "years.crash"], 0)
-  }else if(YR == 2098){
-    runs.count[i, "full.duration"] <- runs.count[i, "years.crash"]
-    
-  }
-}
-
-#----------------------------------------------------------#
-#Getting stats for the duration of major crashes
-#----------------------------------------------------------#
-#Creating a mode function
-getmode <- function(v) {
-  uniqv <- unique(v)
-  uniqv[which.max(tabulate(match(v, uniqv)))]
-}
-
-runs.count$full.duration <- as.numeric(runs.count$full.duration)
-
-#General summary stats of duration
-#mean median and mode of duration of event
-Mean.years <- mean(as.numeric(runs.count[runs.count$full.duration != 0 ,"full.duration"]), na.rm = T)
-Median.years <- median(as.numeric(runs.count[runs.count$full.duration != 0 ,"full.duration"]), na.rm = T)
-Mode.years <- getmode(as.numeric(runs.count[runs.count$full.duration != 0 ,"full.duration"]))
-
-duration.df <- data.frame(Mean.years, Median.years, Mode.years)
-#Seems like 1 year is the median and mode but the mean is just under 2
-
-
-#Aggregating our stats by Management and rcp
-agg.duration <- aggregate(full.duration~rcp+Management, data = runs.count[runs.count$full.duration >0,], FUN = mean, na.rm = T)
-agg.duration[, "sd"] <- aggregate(full.duration~rcp+Management, data = runs.count[runs.count$full.duration >0,], FUN = sd, na.rm = T)[, "full.duration"]
-agg.duration[, "median"] <- aggregate(full.duration~rcp+Management, data = runs.count[runs.count$full.duration >0,], FUN = median, na.rm = T)[, "full.duration"]
-agg.duration[, "mode"] <- aggregate(full.duration~rcp+Management, data = runs.count[runs.count$full.duration >0,], FUN = getmode)[, "full.duration"]
-
-stat.shape <- reshape(agg.duration, idvar ="Management", timevar = "rcp",direction = "wide")
-colnames(stat.shape) <- c("Management", "Mean # crashes (rcp45)", "SD # of crashes (rcp45)", "Median (rcp45)", "Mode (rcp45)",
-                          "Mean # crashes (rcp85)", "SD # of crashes (rcp85)", "Median (rcp45)", "Mode (rcp85)")
-
-write.csv(stat.shape, "../data/crash_duration.csv")
