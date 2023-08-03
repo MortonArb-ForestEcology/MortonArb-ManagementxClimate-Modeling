@@ -208,14 +208,24 @@ write.csv(time.weath.agg, file.path(path.google, "processed_data/Time_by_relweat
 #-----------------------------------------------------#
 summary(runs.fill)
 
+theme.clean <- theme(axis.text = element_text(size=rel(2), face="bold", color="black"),
+                     axis.title = element_text(size=rel(1.7), face="bold"),
+                     legend.title=element_text(size=rel(2)),
+                     legend.text=element_text(size=rel(2)),
+                     panel.background = element_rect(fill=NA, color="black"),
+                     panel.grid=element_blank(),
+                     panel.spacing.x = unit(1, "lines"),
+                     plot.margin = unit(c(1, 1, 1, 1), "lines"))
+
 raw.met.tair <- ggplot(data=runs.fill[!is.na(runs.fill$ind.crash.lag),], aes(x=ind.crash.lag, y=diff.tair, group=Management), position=dodge) +
   geom_errorbar(aes(color=Management), stat="summary", fun.y="sd", size=0.75, alpha=0.75) +
   geom_line(aes(color=Management), stat="summary", fun="mean", size=2) +
   geom_point(aes(color=Management), stat="summary", fun="mean", size=4) +
   scale_color_manual(values=c("None"="#1f78b4", "Under"="#a6cee3", "Shelter"="#33a02c", "Group"="#b2df8a")) +
   theme_bw() + theme(axis.title.x=element_blank(), panel.spacing.y = unit(2, "lines"))+
-  theme(text=element_text(size=17))+
-  ylab("Difference in Temperature (C)") +
+  #theme(text=element_text(size=17))+
+  theme.clean+
+  ylab("Diff in Temperature (C)") +
   guides(color=F)
 
 raw.met.precip <- ggplot(data=runs.fill[!is.na(runs.fill$ind.crash.lag),], aes(x=ind.crash.lag, y=rel.precip, group=Management), position=dodge) +
@@ -224,7 +234,8 @@ raw.met.precip <- ggplot(data=runs.fill[!is.na(runs.fill$ind.crash.lag),], aes(x
   geom_point(aes(color=Management), stat="summary", fun="mean", size=4) +
   scale_color_manual(values=c("None"="#1f78b4", "Under"="#a6cee3", "Shelter"="#33a02c", "Group"="#b2df8a")) +
   theme_bw() + theme(axis.title.x=element_blank(), panel.spacing.y = unit(2, "lines"))+
-  theme(text=element_text(size=17))+
+  #theme(text=element_text(size=17))+
+  theme.clean+
   ylab("Relative Total Precip (m)")
 
 raw.met.vpd <- ggplot(data=runs.fill[!is.na(runs.fill$ind.crash.lag),], aes(x=ind.crash.lag, y=rel.VPD, group=Management), position=dodge) +
@@ -233,7 +244,8 @@ raw.met.vpd <- ggplot(data=runs.fill[!is.na(runs.fill$ind.crash.lag),], aes(x=in
   geom_point(aes(color=Management), stat="summary", fun="mean", size=4) +
   scale_color_manual(values=c("None"="#1f78b4", "Under"="#a6cee3", "Shelter"="#33a02c", "Group"="#b2df8a")) +
   theme_bw() + theme(axis.title.x=element_blank(), panel.spacing.y = unit(2, "lines"))+
-  theme(text=element_text(size=17))+
+  #theme(text=element_text(size=17))+
+  theme.clean+
   ylab("Relative VPD (kPa)") + guides(color=F)
 
 
@@ -593,39 +605,52 @@ write.csv(df.time.structxind, file.path(path.google, "Drought and heat analysis"
 write.csv(df.mgmt.structxind, file.path(path.google, "Drought and heat analysis", "Mixed effects models results/SEA_ANOVA_Struct_Mgmt.csv"), row.names = F)
 
 
+theme.clean <- theme(axis.text = element_text(size=rel(1.7), face="bold", color="black"),
+                     axis.title = element_text(size=rel(1.7), face="bold"),
+                     legend.title=element_text(size=rel(2)),
+                     legend.text=element_text(size=rel(2)),
+                     panel.background = element_rect(fill=NA, color="black"),
+                     panel.grid=element_blank(),
+                     panel.spacing.x = unit(1, "lines"),
+                     plot.margin = unit(c(1, 1, 1, 1), "lines"))
+
 raw.struc.agb3 <- ggplot(data=runs.fill[runs.fill$group.crash.lag!="loss",], aes(x=Management, fill=group.crash.lag.check, y=agb), position=dodge) + 
   geom_boxplot(alpha=0.7) +
   scale_fill_manual(name = "Loss Event\nOccurence", values=c("Y"="red3", "N"="black")) +
   theme_bw() + theme(axis.title.x=element_blank(), panel.spacing.y = unit(2, "lines"))+
-  theme(text=element_text(size=21))+
+  #theme(text=element_text(size=21))+
   ylab("AGB (kgC/m2)")+
+  theme.clean+
   guides(fill=F)
 
 raw.struc.density3 <- ggplot(data=runs.fill[runs.fill$group.crash.lag!="loss",], aes(x=Management, fill=group.crash.lag.check, y=density.tree.convert), position=dodge) + 
   geom_boxplot(alpha=0.7) +
   scale_fill_manual(name = "Loss Event\nOccurence", values=c("Y"="red3", "N"="black")) +
   theme_bw() + theme(axis.title.x=element_blank(), panel.spacing.y = unit(2, "lines"))+
-  theme(text=element_text(size=21))+
+  #theme(text=element_text(size=21))+
+  theme.clean+
   ylab("Density (trees/ha)")
 
 raw.struc.meandbh3 <- ggplot(data=runs.fill[runs.fill$group.crash.lag!="loss",], aes(x=Management, fill=group.crash.lag.check, y=tree.dbh.mean), position=dodge) + 
   geom_boxplot(alpha=0.7) +
   scale_fill_manual(name = "Loss Event\nOccurence", values=c("Y"="red3", "N"="black")) +
   theme_bw() + theme(axis.title.x=element_blank(), panel.spacing.y = unit(2, "lines"))+  
-  theme(text=element_text(size=21))+
+  #theme(text=element_text(size=21))+
+  theme.clean+
   ylab("Mean DBH (cm)")+
   guides(fill=F)
 
 raw.struc.sddbh3 <- ggplot(data=runs.fill[runs.fill$group.crash.lag!="loss",], aes(x=Management, fill=group.crash.lag.check, y=tree.dbh.sd), position=dodge) + 
   geom_boxplot(alpha=0.7) +
   scale_fill_manual(name = "Loss Event\nOccurence", values=c("Y"="red3", "N"="black")) +
-  theme_bw() + theme(axis.title.x=element_blank(), panel.spacing.y = unit(2, "lines"))+    
-  theme(text=element_text(size=21))+
+  theme_bw() + theme(axis.title.x=element_blank(), panel.spacing.y = unit(2, "lines"))+ 
+  theme.clean+
+  #theme(text=element_text(size=21))+
   ylab("SD of DBH (cm)")
 
 
 png(file.path(path.figures, "SEA_Structure_CrashYN_RawDat-Boxplot.png"), width=12, height=8, units="in", res=220)
-cowplot::plot_grid(raw.struc.agb3, raw.struc.density3, raw.struc.meandbh3, raw.struc.sddbh3, ncol=2, labels = c("A", "B", "C", "D"), rel_widths = c(0.8,1.2,0.8,1.2))
+  cowplot::plot_grid(raw.struc.agb3, raw.struc.density3, raw.struc.meandbh3, raw.struc.sddbh3, ncol=2, labels = c("A", "B", "C", "D"), rel_widths = c(0.8,1.2,0.8,1.2))
 dev.off()
 
 ## Summarizing results

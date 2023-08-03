@@ -297,15 +297,15 @@ names(var.labs) <- c("agb", "density.tree.convert", "tree.dbh.mean", "tree.dbh.s
 
 path.figures <- "G:/.shortcut-targets-by-id/0B_Fbr697pd36c1dvYXJ0VjNPVms/MANDIFORE/MANDIFORE_CaseStudy_MortonArb/Drought and heat analysis/Figures/"
 
-theme.clean <- theme(axis.text = element_text(size=rel(1.5), color="black"),
+theme.clean <- theme(axis.text = element_text(size=rel(2), face="bold", color="black"),
                      axis.title = element_text(size=rel(2), face="bold"),
-                     legend.title=element_text(size=rel(1.5)),
-                     legend.text=element_text(size=rel(1.5)),
+                     legend.title=element_text(size=rel(2)),
+                     legend.text=element_text(size=rel(2)),
                      legend.position = "top",
                      panel.background = element_rect(fill=NA, color="black"),
                      panel.grid=element_blank(),
                      panel.spacing.x = unit(1, "lines"),
-                     strip.text = element_text(size=rel(1.5)),
+                     strip.text = element_text(size=rel(2), face="bold",),
                      strip.background = element_rect(fill=NA),
                      plot.margin = unit(c(1, 1, 1, 1), "lines"))
 #plot.title = element_text(size=rel(2), face="bold", hjust=0.5))
@@ -320,6 +320,7 @@ png(paste0(path.figures, "HarvestStructure_Management.png"), width=14, height=8,
 ggplot(data=dat.harvest[dat.harvest$time == "Mid-century" | dat.harvest$time == "End-of-century" | dat.harvest$time == "Post-harvest",]) +
   facet_wrap(~ind, scales="free_y", labeller = labeller(ind = var.labs), switch = "y") +
   geom_boxplot(aes(x=as.factor(time), y=values, fill=Management)) +
+  #geom_text(inherit.aes=FALSE, data=AGB_Posthoc, aes(x = time, y = values, fill = Management, label = Letters),size=8)+
   scale_fill_manual(values=c("None"="#1f78b4", "Under"="#a6cee3", "Shelter"="#33a02c", "Group"="#b2df8a")) +
   theme.clean+
   scale_y_continuous(name ="")+
@@ -351,9 +352,9 @@ mult.df.25 <- data.frame()
 mult.df.50 <- data.frame()
 mult.df.99 <- data.frame()
 struc.var <- c("agb", "density.tree.convert", "tree.dbh.mean", "tree.dbh.sd")
-for(RCP in unique(runs.late$rcp)){
+#for(RCP in unique(runs.late$rcp)){
   for(COL in struc.var){
-    lm.test.25 <- lme(eval(substitute(j ~ Management, list(j = as.name(COL)))), random=list(GCM =~1), data = runs.late[runs.late$year == 2025 & runs.late$rcp == RCP,], method = "ML")
+    lm.test.25 <- lme(eval(substitute(j ~ Management, list(j = as.name(COL)))), random=list(GCM =~1), data = runs.late[runs.late$year == 2025,], method = "ML")
     print(paste(COL, "25"))
     print(anova(lm.test.25))
     #Doing a multiple comparison across the different management types
@@ -369,7 +370,7 @@ for(RCP in unique(runs.late$rcp)){
     mult.df.25 <- rbind(mult.df.25, dat.mult.25)
     
     
-    lm.test.50 <- lme(eval(substitute(j ~ Management, list(j = as.name(COL)))), random=list(GCM =~1), data = runs.late[runs.late$year == 2050 & runs.late$rcp == RCP,], method = "ML")
+    lm.test.50 <- lme(eval(substitute(j ~ Management, list(j = as.name(COL)))), random=list(GCM =~1), data = runs.late[runs.late$year == 2050,], method = "ML")
     print(paste(COL, "50"))
     print(anova(lm.test.50))
     mult.list.50 <- list()
@@ -385,7 +386,7 @@ for(RCP in unique(runs.late$rcp)){
     mult.df.50 <- rbind(mult.df.50, dat.mult.50)
     
     
-    lm.test.99 <- lme(eval(substitute(j ~ Management, list(j = as.name(COL)))), random=list(GCM =~1), data = runs.late[runs.late$year == 2099 & runs.late$rcp == RCP,], method = "ML")
+    lm.test.99 <- lme(eval(substitute(j ~ Management, list(j = as.name(COL)))), random=list(GCM =~1), data = runs.late[runs.late$year == 2099,], method = "ML")
     print(paste(COL, "99"))
     print(anova(lm.test.99))
     mult.list.99 <- list()
@@ -400,37 +401,39 @@ for(RCP in unique(runs.late$rcp)){
     dat.mult.99 <- dplyr::bind_rows(mult.list.99)
     mult.df.99 <- rbind(mult.df.99, dat.mult.99)
   }
-}
+#}
 #Creating different dataframes to look at specific windows. This information should evtually end up captured in a figure
-rcp45.25.df <- reshape2::dcast(mult.df.25[mult.df.25$rcp=="rcp45",], Comp ~ Var)
-rcp45.25.df$Scenario <- "Low Emmissions"
+rcp45.25.df <- reshape2::dcast(mult.df.25, Comp ~ Var)
+#rcp45.25.df$Scenario <- "Low Emmissions"
 rcp45.25.df$year <- "2025"
-rcp45.25.df <- rcp45.25.df[,c(6,7,1,2,3,4,5)]
-rcp85.25.df <- reshape2::dcast(mult.df.25[mult.df.25$rcp=="rcp85",], Comp ~ Var)
-rcp85.25.df$Scenario <- "High Emmissions"
-rcp85.25.df$year <- "2025"
-rcp85.25.df <- rcp85.25.df[,c(6,7,1,2,3,4,5)]
+#rcp45.25.df <- rcp45.25.df[,c(6,7,1,2,3,4,5)]
+#rcp85.25.df <- reshape2::dcast(mult.df.25[mult.df.25$rcp=="rcp85",], Comp ~ Var)
+#rcp85.25.df$Scenario <- "High Emmissions"
+#rcp85.25.df$year <- "2025"
+#rcp85.25.df <- rcp85.25.df[,c(6,7,1,2,3,4,5)]
 
-rcp45.50.df <- reshape2::dcast(mult.df.50[mult.df.50$rcp=="rcp45",], Comp ~ Var)
-rcp45.50.df$Scenario <- "Low Emmissions"
+rcp45.50.df <- reshape2::dcast(mult.df.50, Comp ~ Var)
+#rcp45.50.df$Scenario <- "Low Emmissions"
 rcp45.50.df$year <- "2050"
-rcp45.50.df <- rcp45.50.df[,c(6,7,1,2,3,4,5)]
-rcp85.50.df <- reshape2::dcast(mult.df.50[mult.df.50$rcp=="rcp85",], Comp ~ Var)
-rcp85.50.df$Scenario <- "High Emmissions"
-rcp85.50.df$year <- "2050"
-rcp85.50.df <- rcp85.50.df[,c(6,7,1,2,3,4,5)]
+#rcp45.50.df <- rcp45.50.df[,c(6,7,1,2,3,4,5)]
+#rcp85.50.df <- reshape2::dcast(mult.df.50[mult.df.50$rcp=="rcp85",], Comp ~ Var)
+#rcp85.50.df$Scenario <- "High Emmissions"
+#rcp85.50.df$year <- "2050"
+#rcp85.50.df <- rcp85.50.df[,c(6,7,1,2,3,4,5)]
 
-rcp45.99.df <- reshape2::dcast(mult.df.99[mult.df.99$rcp=="rcp45",], Comp ~ Var)
-rcp45.99.df$Scenario <- "Low Emmissions"
+rcp45.99.df <- reshape2::dcast(mult.df.99, Comp ~ Var)
+#rcp45.99.df$Scenario <- "Low Emmissions"
 rcp45.99.df$year <- "2099"
-rcp45.99.df <- rcp45.99.df[,c(6,7,1,2,3,4,5)]
-rcp85.99.df <- reshape2::dcast(mult.df.99[mult.df.99$rcp=="rcp85",], Comp ~ Var)
-rcp85.99.df$Scenario <- "High Emmissions"
-rcp85.99.df$year <- "2099"
-rcp85.99.df <- rcp85.99.df[,c(6,7,1,2,3,4,5)]
+#rcp45.99.df <- rcp45.99.df[,c(6,7,1,2,3,4,5)]
+#rcp85.99.df <- reshape2::dcast(mult.df.99[mult.df.99$rcp=="rcp85",], Comp ~ Var)
+#rcp85.99.df$Scenario <- "High Emmissions"
+#rcp85.99.df$year <- "2099"
+#rcp85.99.df <- rcp85.99.df[,c(6,7,1,2,3,4,5)]
 
-struc.comp <- rbind(rcp45.25.df,rcp45.50.df, rcp45.99.df, rcp85.25.df, rcp85.50.df, rcp85.99.df)
+struc.comp <- rbind(rcp45.25.df,rcp45.50.df, rcp45.99.df)
 write.csv(struc.comp, "../data/Struc_val_comp.csv")
+
+struc.agb <- struc.comp[,c("Comp", "agb", "year") ]
 
 
 runs.late <- runs.yr[runs.yr$year >= 2025, ]
@@ -537,7 +540,7 @@ weath.time <- ggplot(data=dat.wagg)+
         panel.grid=element_blank(),
         panel.spacing.x = unit(1, "lines"),
         strip.text.x = element_text(size=rel(2), face="bold"),
-        strip.text.y = element_text(size=rel(1.5), face="bold"),
+        strip.text.y = element_text(size=rel(1.7), face="bold"),
         strip.background = element_rect(fill=NA),
         strip.placement = "outside",
         plot.margin = unit(c(1, 1, 1, 1), "lines"),
@@ -552,17 +555,17 @@ weath.cent <- ggplot(data=dat.wagg[dat.wagg$year == 2025 | dat.wagg$year == 2050
   scale_fill_manual(name = "Emissions\nscenario", values=c("RCP4.5"="gold2", "RCP8.5"="orangered2"))+
   #ggpubr::stat_compare_means(aes(x=as.character(year), y=values, fill = rcp), method = "t.test")+
   theme(axis.text.y = element_text(size=rel(2), color="black"),
-        axis.title.y = element_blank(),
-        axis.text.x = element_text(size=rel(1.4), color="black"),
+        axis.title.y = element_text(size=rel(2), color="black", face="bold"),
+        axis.text.x = element_text(size=rel(2), color="black", face="bold"),
         axis.title.x = element_text(size=rel(2), color="black", face="bold"),
-        legend.title=element_text(size=rel(1.4)),
-        legend.text=element_text(size=rel(1.4)),
+        legend.title=element_text(size=rel(2)),
+        legend.text=element_text(size=rel(2)),
         legend.position = "top",
         panel.background = element_rect(fill=NA, color="black"),
         panel.grid=element_blank(),
         panel.spacing.x = unit(1, "lines"),
         strip.text.x = element_text(size=rel(2), face="bold"),
-        strip.text.y = element_text(size=rel(1.5), face="bold"),
+        strip.text.y = element_text(size=rel(1.7), face="bold"),
         strip.background = element_rect(fill=NA),
         strip.placement = "outside",
         plot.margin = unit(c(1, 1, 1, 1), "lines"),

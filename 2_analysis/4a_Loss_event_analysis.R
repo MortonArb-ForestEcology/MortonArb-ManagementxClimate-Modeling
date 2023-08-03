@@ -66,7 +66,7 @@ ggplot(data=runs.comb)+
   geom_point(data=runs.comb[runs.comb$nonseq.loss.event.20==T & runs.comb$year>2024 & !is.na(runs.comb$agb.rel.diff),], aes(x=year, y=agb, group=GCM), color="red2", size=3) +
   labs(x="Year", y="Aboveground Biomass (kgC/m2)") +
   #geom_text(x=2025, y=25, label="Harvest Period: 2020-2024", color="orange3", hjust=0) +
-  theme(axis.text = element_text(size=rel(1.5), color="black"),
+  theme(axis.text = element_text(size=rel(2), color="black"),
         axis.title = element_text(size=rel(2), face="bold"),
         panel.background = element_rect(fill=NA, color="black"),
         panel.grid=element_blank(),
@@ -130,7 +130,7 @@ stat.shape <- reshape(stat.shape,idvar ="Management", timevar = "TimePeriod",dir
 # ggplot(data=crash.stack) +
 # facet_grid(.~rcp) +
 # geom_boxplot(aes(x=ind, y=values, fill=Management))
-theme.clean <-   theme(axis.text = element_text(size=rel(1.5), color="black"),
+theme.clean <-   theme(axis.text = element_text(size=rel(2), color="black"),
                        axis.title = element_text(size=rel(2), face="bold"),
                        legend.title=element_text(size=rel(1.5)),
                        legend.text=element_text(size=rel(1.5)),
